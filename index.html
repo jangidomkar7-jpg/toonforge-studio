@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ToonForge AI — Cartoon Animation Maker</title>
+  <meta name="description" content="Create animated 3D cartoon stories from text.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#"><span class="brand-icon">✦</span> ToonForge <small>STUDIO</small></a>
+    <div class="top-actions"><span class="local-tag">● Browser-based studio</span><button id="helpBtn" class="ghost">How it works</button></div>
+  </header>
+
+  <main class="layout">
+    <aside class="sidebar">
+      <div class="side-title">CREATE PROJECT</div>
+      <label for="story">Your story / script</label>
+      <textarea id="story" rows="8" placeholder="एक छोटे से गाँव में मीरा नाम की लड़की रहती थी...">एक छोटे से गाँव में मीरा नाम की लड़की रहती थी। एक दिन उसे जंगल में एक चमकता हुआ जादुई पत्थर मिला। तभी उसका दोस्त आरव वहाँ आया। दोनों ने मिलकर पत्थर को गाँव के पुराने मंदिर तक पहुँचाया।</textarea>
+      <div class="field-row">
+        <div><label for="style">Visual style</label><select id="style"><option value="colorful">Colorful cartoon</option><option value="storybook">Storybook</option><option value="simple">Minimal 3D</option></select></div>
+        <div><label for="ratio">Aspect ratio</label><select id="ratio"><option value="16:9">16:9 YouTube</option><option value="9:16">9:16 Shorts</option><option value="1:1">1:1 Square</option></select></div>
+      </div>
+      <label for="voice">Narration voice</label>
+      <select id="voice"><option value="hi-IN">Hindi (India)</option><option value="en-US">English (US)</option></select>
+      <label class="check"><input type="checkbox" id="narration" checked> Add browser voice narration</label>
+      <button id="generate" class="primary">✦ Generate cartoon scenes</button>
+      <p class="hint">Your script is split into scenes automatically. You can preview, narrate and record the animation.</p>
+      <hr>
+      <div class="side-title">SCENES <span id="sceneCount">0</span></div>
+      <div id="sceneList" class="scene-list"><p class="muted">Generate scenes to get started.</p></div>
+    </aside>
+
+    <section class="workspace">
+      <div class="workspace-head">
+        <div><div class="eyebrow">ANIMATION CANVAS</div><h1 id="projectTitle">My first cartoon</h1></div>
+        <div class="head-actions"><button id="playAll" class="secondary">▶ Play all</button><button id="download" class="primary" disabled>⬇ Export video</button></div>
+      </div>
+      <div class="stage-wrap">
+        <div id="stage" class="stage">
+          <div class="stage-loading" id="stageLoading">Your 3D cartoon stage will appear here</div>
+          <canvas id="sceneCanvas"></canvas>
+          <div id="caption" class="caption">Write a story and select “Generate cartoon scenes”.</div>
+          <div class="stage-tools"><button id="prev" title="Previous scene">‹</button><span id="sceneLabel">Scene 0 / 0</span><button id="next" title="Next scene">›</button></div>
+        </div>
+      </div>
+      <div class="timeline-head"><strong>STORYBOARD</strong><span id="duration">Estimated duration: —</span></div>
+      <div id="timeline" class="timeline"><div class="empty-timeline">Your generated scenes will appear here.</div></div>
+      <div class="status" id="status">Ready. Everything runs locally in your browser.</div>
+    </section>
+  </main>
+
+  <dialog id="helpDialog">
+    <h2>How ToonForge works</h2>
+    <p>Enter a story, generate scenes, then preview or play the full sequence. The studio builds simple 3D cartoon scenes in your browser and can use your device's speech voices.</p>
+    <p><strong>Export:</strong> The Export video button records the animated canvas as a WebM video. Browser voice narration is played separately and may not be included in the recording on every device.</p>
+    <p><strong>Important:</strong> This starter version creates procedural 3D cartoon scenes; it is not a cloud AI text-to-video service. A hosted AI video API would require an API key and backend server, which GitHub Pages alone cannot securely provide.</p>
+    <button id="closeHelp" class="primary">Got it</button>
+  </dialog>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
