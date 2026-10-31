@@ -10,53 +10,53 @@
 <body>
   <header class="topbar">
     <a class="brand" href="#"><span class="brand-icon">✦</span> ToonForge <small>STUDIO</small></a>
-    <div class="top-actions"><span class="local-tag">● Browser-based studio</span><button id="helpBtn" class="ghost">How it works</button></div>
+    <div class="top-actions"><span class="local-tag">● ऑटो 3D कार्टून स्टूडियो</span><button id="helpBtn" class="ghost">How it works</button></div>
   </header>
 
   <main class="layout">
     <aside class="sidebar">
-      <div class="side-title">CREATE PROJECT</div>
-      <label for="story">अपनी कहानी लिखें</label>
+      <div class="side-title">ऑटो कार्टून बनाएं</div>
+      <label for="story">Your story / script</label>
       <textarea id="story" rows="8" placeholder="एक छोटे से गाँव में मीरा नाम की लड़की रहती थी...">एक छोटे से गाँव में मीरा नाम की लड़की रहती थी। एक दिन उसे जंगल में एक चमकता हुआ जादुई पत्थर मिला। तभी उसका दोस्त आरव वहाँ आया। दोनों ने मिलकर पत्थर को गाँव के पुराने मंदिर तक पहुँचाया।</textarea>
       <div class="field-row">
-        <div><label for="style">Visual style</label><select id="style"><option value="colorful">Colorful cartoon</option><option value="storybook">Storybook</option><option value="simple">Minimal 3D</option></select></div>
-        <div><label for="ratio">Aspect ratio</label><select id="ratio"><option value="16:9">16:9 YouTube</option><option value="9:16">9:16 Shorts</option><option value="1:1">1:1 Square</option></select></div>
+        <div><label for="style">कार्टून स्टाइल</label><select id="style"><option value="colorful">Colorful cartoon</option><option value="storybook">Storybook</option><option value="simple">Minimal 3D</option></select></div>
+        <div><label for="ratio">वीडियो अनुपात</label><select id="ratio"><option value="16:9">16:9 YouTube</option><option value="9:16">9:16 Shorts</option><option value="1:1">1:1 Square</option></select></div>
       </div>
-      <label for="voice">Narration voice</label>
+      <label for="voice">आवाज़ की भाषा</label>
       <select id="voice"><option value="hi-IN">Hindi (India)</option><option value="en-US">English (US)</option></select>
-      <label class="check"><input type="checkbox" id="narration" checked> Add browser voice narration</label>
-      <button id="generate" class="primary">✦ कहानी से ऑटो एनिमेशन बनाएँ</button>
-      <p class="hint">कहानी लिखें और बटन दबाएँ। सीन, कैरेक्टर की हरकतें और हिंदी नैरेशन अपने आप चलेंगे।</p>
+      <label class="check"><input type="checkbox" id="narration" checked> हिंदी ब्राउज़र नैरेशन जोड़ें</label>
+      <button id="generate" class="primary">✦ Generate cartoon scenes</button>
+      <p class="hint">Your script is split into scenes automatically. You can preview, narrate and record the animation.</p>
       <hr>
-      <div class="side-title">SCENES <span id="sceneCount">0</span></div>
-      <div id="sceneList" class="scene-list"><p class="muted">Generate scenes to get started.</p></div>
+      <div class="side-title">दृश्य <span id="sceneCount">0</span></div>
+      <div id="sceneList" class="scene-list"><p class="muted">शुरू करने के लिए कहानी बनाएँ।</p></div>
     </aside>
 
     <section class="workspace">
       <div class="workspace-head">
-        <div><div class="eyebrow">ऑटो एनिमेशन</div><h1 id="projectTitle">My first cartoon</h1></div>
-        <div class="head-actions"><button id="playAll" class="secondary">▶ फिर से चलाएँ</button><button id="download" class="primary" disabled>⬇ वीडियो डाउनलोड</button></div>
+        <div><div class="eyebrow">ANIMATION CANVAS</div><h1 id="projectTitle">My first cartoon</h1></div>
+        <div class="head-actions"><button id="playAll" class="secondary">▶ Play all</button><button id="download" class="primary" disabled>⬇ Export video</button></div>
       </div>
       <div class="stage-wrap">
         <div id="stage" class="stage">
-          <div class="stage-loading" id="stageLoading">Your 3D cartoon stage will appear here</div>
+          <div class="stage-loading" id="stageLoading">आपका 3D कार्टून यहाँ दिखेगा</div>
           <canvas id="sceneCanvas"></canvas>
-          <div id="caption" class="caption">Write a story and select “Generate cartoon scenes”.</div>
-          <div class="stage-tools"><button id="prev" title="Previous scene">‹</button><span id="sceneLabel">Scene 0 / 0</span><button id="next" title="Next scene">›</button></div>
+          <div id="caption" class="caption">कहानी लिखें और ऑटो एनिमेशन बनाएँ।</div>
+          <div class="stage-tools"><button id="prev" title="Previous scene">‹</button><span id="sceneLabel">दृश्य 0 / 0</span><button id="next" title="Next scene">›</button></div>
         </div>
       </div>
-      <div class="timeline-head"><strong>कहानी के दृश्य</strong><span id="duration">Estimated duration: —</span></div>
+      <div class="timeline-head"><strong>STORYBOARD</strong><span id="duration">अनुमानित अवधि: —</span></div>
       <div id="timeline" class="timeline"><div class="empty-timeline">Your generated scenes will appear here.</div></div>
-      <div class="status" id="status">तैयार। अपनी कहानी लिखकर शुरू करें।</div>
+      <div class="status" id="status">Ready. Everything runs locally in your browser.</div>
     </section>
   </main>
 
   <dialog id="helpDialog">
-    <h2>How ToonForge works</h2>
-    <p>कहानी लिखें और ऑटो एनिमेशन बनाएँ। यह ब्राउज़र में पहले से बने 3D कार्टून पात्रों और प्रोग्राम किए गए एक्शन से दृश्य तैयार करता है।</p>
-    <p><strong>Export:</strong> वीडियो WebM फॉर्मेट में रिकॉर्ड होती है। हिंदी आवाज़ डिवाइस/ब्राउज़र पर निर्भर है और रिकॉर्डिंग में शामिल न भी हो सकती है।</p>
-    <p><strong>Important:</strong> यह अभी वास्तविक AI text-to-video सेवा नहीं है। यह पहले से बने 3D पात्रों और प्रोग्राम किए गए एक्शन का उपयोग करता है। असली AI वीडियो के लिए अलग सर्वर/API चाहिए।</p>
-    <button id="closeHelp" class="primary">Got it</button>
+    <h2>ToonForge कैसे काम करता है</h2>
+    <p>Enter a story, generate scenes, then preview or play the full sequence. The studio builds simple 3D cartoon scenes in your browser and can use your device's speech voices.</p>
+    <p><strong>Export:</strong> The Export video button records the animated canvas as a WebM video. Browser voice narration is played separately and may not be included in the recording on every device.</p>
+    <p><strong>Important:</strong> This starter version creates procedural 3D cartoon scenes; it is not a cloud AI text-to-video service. A hosted AI video API would require an API key and backend server, which GitHub Pages alone cannot securely provide.</p>
+    <button id="closeHelp" class="primary">ठीक है</button>
   </dialog>
   <script type="module" src="app.js"></script>
 </body>
