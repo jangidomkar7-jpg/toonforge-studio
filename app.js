@@ -1,4 +1,5 @@
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('sceneCanvas');
@@ -18,6 +19,9 @@ const world = new THREE.Group(); scene.add(world);
 
 let scenes = [], current = 0, playing = false, raf = 0, recorder = null, chunks = [], playToken = 0;
 let hero1, hero2, props = [], sceneStart = performance.now(), currentAction = 'idle';
+const gltfLoader = new GLTFLoader();
+const modelCache = {};
+let sceneLoadToken = 0;
 
 const material = (c, rough=.82) => new THREE.MeshStandardMaterial({color:c, roughness:rough});
 const M = {
@@ -161,13 +165,38 @@ function detectAction(text) {
   if (/चल|पहुँच|पहुंच|गए|गया|गयी|आया|आए|walk/.test(text)) return 'walk';
   return 'idle';
 }
-function showScene(i) {
+async function loadHeroModel(file, x, kind) {
+  if (!modelCache[file]) {
+    modelCache[file] = gltfLoader.loadAsync(`models/${file}`).then(gltf => gltf.scene).catch(err => {
+      console.error(`Could not load models/${file}`, err);
+      throw err;
+    });
+  }
+  const source = await modelCache[file];
+  const model = source.clone(true);
+  const root = group(world, x, 0, 0);
+  root.add(model);
+  const box = new THREE.Box3().setFromObject(model);
+  const size = new THREE.Vector3(); box.getSize(size);
+  const height = Math.max(size.y, 0.01);
+  const targetHeight = kind === 1 ? 2.35 : 2.2;
+  model.scale.setScalar(targetHeight / height);
+  const scaledBox = new THREE.Box3().setFromObject(model);
+  model.position.y -= scaledBox.min.y;
+  // Models face +Z, matching the camera direction.
+  root.userData.kind = kind;
+  root.userData.isGLB = true;
+  root.userData.baseY = 0;
+  return root;
+}
+async function showScene(i) {
   if(!scenes.length)return;
   current=Math.max(0,Math.min(i,scenes.length-1));
+  const token = ++sceneLoadToken;
   clearWorld();
   const text=scenes[current].text;
   environment(text); addStoryProp(text);
-  hero1=makeCharacter(-1.45,1); hero2=makeCharacter(1.45,2);
+  hero1 = hero2 = null;
   currentAction=scenes[current].action; sceneStart=performance.now();
   camera.position.set(/जंगल|forest/.test(text)?-.45:0,3.25,10.8);
   camera.lookAt(0,1.35,0);
@@ -178,7 +207,22 @@ function showScene(i) {
   $('timeline').querySelectorAll('.timeline-card').forEach((el,n)=>el.classList.toggle('active',n===current));
   $('prev').disabled=current===0; $('next').disabled=current===scenes.length-1;
   $('stageLoading').style.display='none';
+  $('status').textContent='गोलू और चिंटू के 3D मॉडल लोड हो रहे हैं…';
+  try {
+    const [golu, chintu] = await Promise.all([
+      loadHeroModel('golu.glb', -1.45, 1),
+      loadHeroModel('chintu.glb', 1.45, 2)
+    ]);
+    if (token !== sceneLoadToken) return;
+    hero1 = golu; hero2 = chintu;
+    $('status').textContent='असली 3D गोलू और चिंटू लोड हो गए!';
+  } catch (error) {
+    if (token !== sceneLoadToken) return;
+    $('status').textContent='3D मॉडल नहीं लोड हुए। models/golu.glb और models/chintu.glb के नाम और जगह जाँचें।';
+    console.error(error);
+  }
 }
+
 function resize(){
   const rect=canvas.getBoundingClientRect(); if(!rect.width||!rect.height)return;
   renderer.setSize(rect.width,rect.height,false);
@@ -190,48 +234,33 @@ resize();
 
 function poseCharacter(ch, action, t, offset=0) {
   if(!ch)return;
-  const {body,head,mouth,arms,legs}=ch.userData.rig;
   const q=t*3.2+offset;
-  body.position.y=0; body.rotation.z=0;
-  head.rotation.set(0,Math.sin(q*.45)*.08,0);
-  mouth.scale.y=.35;
-  arms.forEach(a=>{a.pivot.rotation.set(0,0,a.side*.08);a.elbow.rotation.x=0;});
-  legs.forEach(l=>l.rotation.x=0);
-  if(action==='walk'||action==='run'){
-    const speed=action==='run'?10:5;
-    legs[0].rotation.x=Math.sin(q*speed/3)*.7;legs[1].rotation.x=-Math.sin(q*speed/3)*.7;
-    arms.forEach(a=>a.pivot.rotation.z=a.side*.08+Math.sin(q*speed/3+Math.PI)*.75*a.side);
-    body.position.y=Math.abs(Math.sin(q*speed/3))*(action==='run'?.2:.08);
-    ch.position.x+=(Math.sin(q*.18+offset)*.002);
-  } else if(action==='jump'){
-    body.position.y=Math.abs(Math.sin(q*1.8))*.75;
-    arms.forEach(a=>a.pivot.rotation.z=-a.side*1.5);
-    legs.forEach(l=>l.rotation.x=-.5);
-  } else if(action==='dance'){
-    body.rotation.z=Math.sin(q*2)*.25;body.position.y=Math.abs(Math.sin(q*2))*.22;
-    arms.forEach(a=>a.pivot.rotation.z=a.side*(-1.1+Math.sin(q*2)*.35));
-    legs.forEach((l,i)=>l.rotation.x=Math.sin(q*2+i*Math.PI)*.65);
-  } else if(action==='laugh'){
-    body.rotation.z=Math.sin(q*4)*.08;body.position.y=Math.abs(Math.sin(q*4))*.08;
-    arms.forEach(a=>a.pivot.rotation.z=-a.side*.9);
-    mouth.scale.y=.9;
-  } else if(action==='surprise'){
-    head.rotation.x=-.18;arms.forEach(a=>a.pivot.rotation.z=-a.side*1.15);
-    body.position.y=.06;
-  } else if(action==='eat'){
-    arms.forEach(a=>a.pivot.rotation.z=-a.side*.8);
-    head.rotation.x=.16;mouth.scale.y=.6;
-  } else if(action==='talk'){
-    head.rotation.y=Math.sin(q*1.4)*.18;arms.forEach(a=>a.pivot.rotation.z=-a.side*(.25+Math.max(0,Math.sin(q*2))*.65));
-    mouth.scale.y=.35+Math.abs(Math.sin(q*5))*.65;
-  } else if(action==='wave'){
-    const a=arms[1];a.pivot.rotation.z=-1.5+Math.sin(q*5)*.25;
-    arms[0].pivot.rotation.z=.15;
+  // The supplied GLB files are static meshes (not rigged yet), so animate
+  // the complete 3D character with readable body movement until rigged clips are added.
+  ch.position.y = 0;
+  ch.rotation.set(0, 0, 0);
+  if(action==='walk' || action==='run') {
+    ch.position.y = Math.abs(Math.sin(q*(action==='run'?8:4))) * (action==='run'?.13:.055);
+    ch.position.x += Math.sin(q*.18+offset)*.0015;
+    ch.rotation.z = Math.sin(q*2)*.035;
+  } else if(action==='jump') {
+    ch.position.y = Math.abs(Math.sin(q*1.8))*.65;
+    ch.rotation.z = Math.sin(q*1.8)*.06;
+  } else if(action==='dance' || action==='laugh') {
+    ch.position.y = Math.abs(Math.sin(q*(action==='dance'?2:4)))*(action==='dance'?.2:.07);
+    ch.rotation.z = Math.sin(q*(action==='dance'?2:4))*(action==='dance'?.18:.07);
+  } else if(action==='surprise') {
+    ch.rotation.z = Math.sin(q*2)*.025;
+    ch.position.y = .035;
+  } else if(action==='talk' || action==='wave') {
+    ch.rotation.y = Math.sin(q*1.5)*.12;
+    ch.rotation.z = Math.sin(q*2)*.025;
   } else {
-    body.position.y=Math.sin(q)*.035;
-    arms.forEach(a=>a.pivot.rotation.z=a.side*(.08+Math.sin(q*.7)*.05));
+    ch.position.y = Math.sin(q)*.025;
+    ch.rotation.y = Math.sin(q*.6)*.035;
   }
 }
+
 function animate(now=0){
   raf=requestAnimationFrame(animate);
   const t=(now-sceneStart)*.001;
